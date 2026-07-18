@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Backend\ProjectStatusRequest;
+use App\Http\Requests\Backend\Project\ProjectStatusBulkDeleteRequest;
+use App\Http\Requests\Backend\Project\ProjectStatusRequest;
 use App\Models\ProjectStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -47,11 +48,6 @@ class ProjectStatusController extends Controller
             $projectStatus->name = $request->name;
             $projectStatus->color = $request->color;
             $projectStatus->status = $request->status;
-            $projectStatus->send_sms = $request->send_sms;
-            $projectStatus->sms_body = $request->sms_body;
-            $projectStatus->send_email = $request->send_email;
-            $projectStatus->email_body = $request->email_body;
-            $projectStatus->created_by = authAdmin()->id;
 
             $projectStatus->save();
 
@@ -79,13 +75,13 @@ class ProjectStatusController extends Controller
                 ->find($id);
 
             if (!$projectStatus) {
-                return redirect()->back()->with([
-                    'alert-type' => 'error',
+                return response()->json([
+                    'status' => false,
                     'message' => 'Data not found.',
                 ]);
             }
 
-            $html = view('admin.project.status.edit', compact('projectStatus'))->render();
+            $html = view('backend.project.status.edit', compact('projectStatus'))->render();
 
             return response()->json([
                 'status' => true,
@@ -118,11 +114,6 @@ class ProjectStatusController extends Controller
             $projectStatus->name = $request->name;
             $projectStatus->color = $request->color;
             $projectStatus->status = $request->status;
-            $projectStatus->send_sms = $request->send_sms;
-            $projectStatus->sms_body = $request->sms_body;
-            $projectStatus->send_email = $request->send_email;
-            $projectStatus->email_body = $request->email_body;
-            $projectStatus->updated_by = authAdmin()->id;
 
             $projectStatus->save();
 
@@ -154,7 +145,6 @@ class ProjectStatusController extends Controller
                 return redirect()->back()->with([
                     'alert-type' => 'error',
                     'message' => $response['message'],
-                    'code' => $response['code'],
                 ]);
             }
 
@@ -163,7 +153,6 @@ class ProjectStatusController extends Controller
             return redirect()->back()->with([
                 'alert-type' => 'success',
                 'message' => $response['message'],
-                'code' => $response['code'],
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -174,6 +163,46 @@ class ProjectStatusController extends Controller
         }
     }
 
+    public function bulkDestroy(ProjectStatusBulkDeleteRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $results = ['success' => [], 'errors' => []];
+
+            foreach ($request->bulk_ids as $id) {
+                $response = $this->destroyData($id);
+                if ($response['status']) {
+                    $results['success'][] = $id;
+                } else {
+                    $results['errors'][$id] = $response['message'];
+                }
+            }
+
+            DB::commit();
+
+            if (empty($results['errors'])) {
+
+                return redirect()->back()->with([
+                    'alert-type' => 'success',
+                    'message' => 'Bulk selected data deleted successfully.',
+                ]);
+            } else {
+
+                return redirect()->back()->with([
+                    'alert-type' => 'error',
+                    'message' => 'Partial success: ' . count($results['success']) . ' deleted, ' . count($results['errors']) . ' failed',
+                    'data' => $results,
+                ]);
+            }
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with([
+                'alert-type' => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
 
     private function destroyData($id)
     {
@@ -185,14 +214,14 @@ class ProjectStatusController extends Controller
 
         if (!$data) {
             return [
-                'alert-type' => 'error',
+                'status' => false,
                 'message' => 'Data not found.',
             ];
         }
 
         if ($data->projects_count > 0) {
             return [
-                'alert-type' => 'error',
+                'status' => false,
                 'message' => 'This project status is currently assigned to project. Please remove those projects before deleting.',
             ];
         }

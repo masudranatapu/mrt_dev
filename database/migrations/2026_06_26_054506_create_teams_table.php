@@ -25,6 +25,8 @@ return new class extends Migration {
             $table->string('instagram_link')->nullable();
             $table->string('linkedin_link')->nullable();
             $table->enum('status', GlobalConstantEnum::STATUS)->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

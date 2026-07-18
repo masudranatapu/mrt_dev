@@ -16,6 +16,8 @@ return new class extends Migration {
             $table->string('question')->nullable();
             $table->text('answer')->nullable();
             $table->enum('status', GlobalConstantEnum::STATUS)->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

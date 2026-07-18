@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Backend;
 
 use App\Classes\FileUploadClass;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Backend\BlogRequest;
+use App\Http\Requests\Backend\Blog\BlogBulkDeleteRequest;
+use App\Http\Requests\Backend\Blog\BlogRequest;
 use App\Models\Blog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -164,7 +165,6 @@ class BlogController extends Controller
                 return redirect()->back()->with([
                     'alert-type' => 'error',
                     'message' => $response['message'],
-                    'code' => $response['code'],
                 ]);
             }
 
@@ -173,8 +173,48 @@ class BlogController extends Controller
             return redirect()->route('admin.blogs.index')->with([
                 'alert-type' => 'success',
                 'message' => $response['message'],
-                'code' => $response['code']
             ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with([
+                'alert-type' => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function bulkDestroy(BlogBulkDeleteRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $results = ['success' => [], 'errors' => []];
+
+            foreach ($request->bulk_ids as $id) {
+                $response = $this->destroyData($id);
+                if ($response['status']) {
+                    $results['success'][] = $id;
+                } else {
+                    $results['errors'][$id] = $response['message'];
+                }
+            }
+
+            DB::commit();
+
+            if (empty($results['errors'])) {
+
+                return redirect()->back()->with([
+                    'alert-type' => 'success',
+                    'message' => 'Bulk selected data deleted successfully.',
+                ]);
+            } else {
+
+                return redirect()->back()->with([
+                    'alert-type' => 'error',
+                    'message' => 'Partial success: ' . count($results['success']) . ' deleted, ' . count($results['errors']) . ' failed',
+                    'data' => $results,
+                ]);
+            }
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with([
@@ -198,10 +238,6 @@ class BlogController extends Controller
 
         // unlink
         $this->fileUpload->fileUnlink($data->thumbnail);
-
-        if ($data->customerAssignees) {
-            $data->customerAssignees()->delete();
-        }
 
         $data->delete();
 

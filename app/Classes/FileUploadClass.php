@@ -103,7 +103,7 @@ class FileUploadClass
     public function fileUnlink($path)
     {
         if (!$path) {
-            false;
+            return false;
         }
 
         // If storage path (starts with storage/)

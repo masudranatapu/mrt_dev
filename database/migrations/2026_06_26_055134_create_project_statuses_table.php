@@ -16,10 +16,6 @@ return new class extends Migration {
             $table->string('name')->nullable();
             $table->string('color')->nullable();
             $table->enum('status', GlobalConstantEnum::STATUS)->nullable()->nullable();
-            $table->enum('send_sms', GlobalConstantEnum::YESNO)->nullable()->nullable();
-            $table->text('sms_body')->nullable();
-            $table->enum('send_email', GlobalConstantEnum::YESNO)->nullable()->nullable();
-            $table->text('email_body')->nullable();
             $table->timestamps();
         });
     }

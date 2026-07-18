@@ -3,19 +3,25 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Backend\ContactUsBulkDeleteRequest;
+use App\Http\Requests\Backend\ContactUs\ContactUsBulkDeleteRequest;
 use App\Models\ContactUs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ContactUsController extends Controller
 {
-    protected $activityLog;
-
     public function index(Request $request)
     {
         try {
             $contactUsLists = ContactUs::query()
+                ->when($request->keyword, function ($q) use ($request) {
+                    $q->where(function ($query) use ($request) {
+                        $query->where('name', 'LIKE', '%' . $request->keyword . '%')
+                            ->orWhere('email', 'LIKE', '%' . $request->keyword . '%')
+                            ->orWhere('phone', 'LIKE', '%' . $request->keyword . '%')
+                            ->orWhere('subject', 'LIKE', '%' . $request->keyword . '%');
+                    });
+                })
                 ->paginate(limit($request->par_page));
 
             return view('backend.contact.index', compact('contactUsLists'));
@@ -38,11 +44,11 @@ class ContactUsController extends Controller
             if (!$contact) {
                 return response()->json([
                     'status' => false,
-                    'data' => 'Data Not found',
+                    'message' => 'Data not found.',
                 ]);
             }
 
-            $html = view('admin.contact.edit', compact('contact'))->render();
+            $html = view('backend.contact.show', compact('contact'))->render();
 
             return response()->json([
                 'status' => true,
@@ -69,7 +75,6 @@ class ContactUsController extends Controller
                 return redirect()->back()->with([
                     'alert-type' => 'error',
                     'message' => $response['message'],
-                    'code' => $response['code'],
                 ]);
             }
 
@@ -136,15 +141,8 @@ class ContactUsController extends Controller
 
         if (!$data) {
             return [
-                'alert-type' => false,
+                'status' => false,
                 'message' => 'Data not found.',
-            ];
-        }
-
-        if ($data->customers_count > 0) {
-            return [
-                'alert-type' => 'error',
-                'message' => 'This project status is currently assigned to project. Please remove those projects before deleting.',
             ];
         }
 

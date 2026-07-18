@@ -31,19 +31,19 @@
         </li>
 
         <li
-            class="menu-item {{ Route::is('admin.lead-status.index') || Route::is('admin.project-status.index') || Route::is('admin.customer-status.index') || Route::is('admin.priority.index') || Route::is('admin.support-ticket-status.index') ? 'active open' : '' }}">
+            class="menu-item {{ Route::is('admin.project-status.index') || Route::is('admin.project.*') ? 'active open' : '' }}">
             <a href="javascript:;" class="menu-link menu-toggle">
                 <i class="menu-icon icon-base bx bxl-product-hunt"></i>
                 <div>{{ __('Projects') }}</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item">
+                <li class="menu-item {{ Route::is('admin.project-status.index') ? 'active' : '' }}">
                     <a href="{{ route('admin.project-status.index') }}" class="menu-link">
                         {{ __('Project Status') }}
                     </a>
                 </li>
-                <li class="menu-item ">
-                    <a href="" class="menu-link">
+                <li class="menu-item {{ Route::is('admin.project.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.project.index') }}" class="menu-link">
                         {{ __('Project') }}
                     </a>
                 </li>
@@ -97,37 +97,37 @@
                     </a>
                 </li>
                 <li class="menu-item {{ Route::is('admin.blogs.*') ? 'active' : '' }}">
-                    <a href="" class="menu-link">
+                    <a href="{{ route('admin.blogs.index') }}" class="menu-link">
                         {{ __('Blogs') }}
                     </a>
                 </li>
                 <li class="menu-item {{ Route::is('admin.faqs.index') ? 'active' : '' }}">
-                    <a href="" class="menu-link">
+                    <a href="{{ route('admin.faqs.index') }}" class="menu-link">
                         {{ __('FAQs') }}
                     </a>
                 </li>
                 <li class="menu-item {{ Route::is('admin.team.index') ? 'active' : '' }}">
-                    <a href="" class="menu-link">
+                    <a href="{{ route('admin.team.index') }}" class="menu-link">
                         {{ __('Teams') }}
                     </a>
                 </li>
                 <li class="menu-item {{ Route::is('admin.page-seo.index') ? 'active' : '' }}">
-                    <a href="" class="menu-link">
+                    <a href="{{ route('admin.page-seo.index') }}" class="menu-link">
                         {{ __('Page SEO Settings') }}
                     </a>
                 </li>
                 <li class="menu-item {{ Route::is('admin.setting.privacy.terms') ? 'active' : '' }}">
-                    <a href="" class="menu-link">
+                    <a href="{{ route('admin.setting.privacy.terms') }}" class="menu-link">
                         {{ __('Privacy & Terms') }}
                     </a>
                 </li>
                 <li class="menu-item {{ Route::is('admin.contact-us.index') ? 'active' : '' }}">
-                    <a href="" class="menu-link">
+                    <a href="{{ route('admin.contact-us.index') }}" class="menu-link">
                         {{ __('Contact List') }}
                     </a>
                 </li>
                 <li class="menu-item {{ Route::is('admin.subscribers.index') ? 'active' : '' }}">
-                    <a href="" class="menu-link">
+                    <a href="{{ route('admin.subscribers.index') }}" class="menu-link">
                         {{ __('Subscribers') }}
                     </a>
                 </li>

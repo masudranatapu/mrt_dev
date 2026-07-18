@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Backend\FaqRequest;
+use App\Http\Requests\Backend\Faq\FaqBulkDeleteRequest;
+use App\Http\Requests\Backend\Faq\FaqRequest;
 use App\Models\Faq;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,8 @@ class FaqController extends Controller
     {
         try {
             $faqs = Faq::query()
+                ->when($request->keyword, fn($q) => $q->where('question', 'LIKE', '%' . $request->keyword . '%'))
+                ->when($request->status && $request->status != 'All', fn($q) => $q->where('status', $request->status))
                 ->with([
                     'createdBy' => fn($q) => $q->select(['id', 'first_name', 'last_name', 'avatar']),
                     'updatedBy' => fn($q) => $q->select(['id', 'first_name', 'last_name', 'avatar']),
@@ -111,8 +114,6 @@ class FaqController extends Controller
 
             $faq->save();
 
-            $faq->save();
-
             DB::commit();
 
             return redirect()->back()->with([
@@ -141,7 +142,6 @@ class FaqController extends Controller
                 return redirect()->back()->with([
                     'alert-type' => 'error',
                     'message' => $response['message'],
-                    'code' => $response['code'],
                 ]);
             }
 
@@ -150,8 +150,48 @@ class FaqController extends Controller
             return redirect()->back()->with([
                 'alert-type' => 'success',
                 'message' => $response['message'],
-                'code' => $response['code']
             ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with([
+                'alert-type' => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function bulkDestroy(FaqBulkDeleteRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $results = ['success' => [], 'errors' => []];
+
+            foreach ($request->bulk_ids as $id) {
+                $response = $this->destroyData($id);
+                if ($response['status']) {
+                    $results['success'][] = $id;
+                } else {
+                    $results['errors'][$id] = $response['message'];
+                }
+            }
+
+            DB::commit();
+
+            if (empty($results['errors'])) {
+
+                return redirect()->back()->with([
+                    'alert-type' => 'success',
+                    'message' => 'Bulk selected data deleted successfully.',
+                ]);
+            } else {
+
+                return redirect()->back()->with([
+                    'alert-type' => 'error',
+                    'message' => 'Partial success: ' . count($results['success']) . ' deleted, ' . count($results['errors']) . ' failed',
+                    'data' => $results,
+                ]);
+            }
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with([
@@ -181,4 +221,3 @@ class FaqController extends Controller
         ];
     }
 }
-

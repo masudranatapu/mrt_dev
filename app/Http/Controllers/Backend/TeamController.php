@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Backend;
 
 use App\Classes\FileUploadClass;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Backend\TeamRequest;
+use App\Http\Requests\Backend\Team\TeamBulkDeleteRequest;
+use App\Http\Requests\Backend\Team\TeamRequest;
 use App\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,12 +24,17 @@ class TeamController extends Controller
         try {
 
             $teams = Team::query()
-                ->with([
-                    'designation'
-                ])
+                ->when($request->keyword, function ($q) use ($request) {
+                    $q->where(function ($query) use ($request) {
+                        $query->where('name', 'LIKE', '%' . $request->keyword . '%')
+                            ->orWhere('department', 'LIKE', '%' . $request->keyword . '%')
+                            ->orWhere('designation', 'LIKE', '%' . $request->keyword . '%');
+                    });
+                })
+                ->when($request->status && $request->status != 'All', fn($q) => $q->where('status', $request->status))
                 ->paginate(limit($request->par_page));
 
-            return view('backend.team.index', compact('teams', 'departments', 'designations'));
+            return view('backend.team.index', compact('teams'));
         } catch (\Exception $e) {
 
             return redirect()->back()->with([
@@ -47,8 +53,11 @@ class TeamController extends Controller
             $team = new Team();
 
             $team->name = $request->name;
-            $team->department_id = $request->department_id;
-            $team->designation_id = $request->designation_id;
+            $team->department = $request->department;
+            $team->designation = $request->designation;
+            $team->phone = $request->phone;
+            $team->email = $request->email;
+            $team->address = $request->address;
 
             if ($request->hasFile("avatar")) {
                 $file_avatar_url = $this->fileUpload->imageUploader($request->file('avatar'), 'team', 400, 400);
@@ -89,12 +98,12 @@ class TeamController extends Controller
             if (!$team) {
                 return response()->json([
                     'status' => false,
-                    'data' => 'Data not found.',
+                    'message' => 'Data not found.',
                 ]);
             }
 
 
-            $html = view('backend.team.edit', compact('team', 'departments', 'designations'))->render();
+            $html = view('backend.team.edit', compact('team'))->render();
 
             return response()->json([
                 'status' => true,
@@ -125,8 +134,11 @@ class TeamController extends Controller
             }
 
             $team->name = $request->name;
-            $team->department_id = $request->department_id;
-            $team->designation_id = $request->designation_id;
+            $team->department = $request->department;
+            $team->designation = $request->designation;
+            $team->phone = $request->phone;
+            $team->email = $request->email;
+            $team->address = $request->address;
 
             if ($request->hasFile("avatar")) {
                 $this->fileUpload->fileUnlink($team->avatar);
@@ -171,7 +183,6 @@ class TeamController extends Controller
                 return redirect()->back()->with([
                     'alert-type' => 'error',
                     'message' => $response['message'],
-                    'code' => $response['code'],
                 ]);
             }
 
@@ -179,8 +190,49 @@ class TeamController extends Controller
 
             return redirect()->back()->with([
                 'alert-type' => 'success',
-                'message' => 'Data deleted successfully.',
+                'message' => $response['message'],
             ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with([
+                'alert-type' => 'error',
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
+    public function bulkDestroy(TeamBulkDeleteRequest $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $results = ['success' => [], 'errors' => []];
+
+            foreach ($request->bulk_ids as $id) {
+                $response = $this->destroyData($id);
+                if ($response['status']) {
+                    $results['success'][] = $id;
+                } else {
+                    $results['errors'][$id] = $response['message'];
+                }
+            }
+
+            DB::commit();
+
+            if (empty($results['errors'])) {
+
+                return redirect()->back()->with([
+                    'alert-type' => 'success',
+                    'message' => 'Bulk selected data deleted successfully.',
+                ]);
+            } else {
+
+                return redirect()->back()->with([
+                    'alert-type' => 'error',
+                    'message' => 'Partial success: ' . count($results['success']) . ' deleted, ' . count($results['errors']) . ' failed',
+                    'data' => $results,
+                ]);
+            }
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with([
@@ -197,7 +249,7 @@ class TeamController extends Controller
 
         if (!$data) {
             return [
-                'alert-type' => false,
+                'status' => false,
                 'message' => 'Data not found.',
             ];
         }

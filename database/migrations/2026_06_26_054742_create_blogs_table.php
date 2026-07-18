@@ -18,6 +18,8 @@ return new class extends Migration {
             $table->longText('description')->nullable();
             $table->string('thumbnail')->nullable();
             $table->enum('status', GlobalConstantEnum::STATUS)->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

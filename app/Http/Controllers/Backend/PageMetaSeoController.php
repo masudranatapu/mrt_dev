@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Classes\FileUploadClass;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Backend\PageMetaSeoRequest;
+use App\Http\Requests\Backend\Setting\PageMetaSeoRequest;
 use App\Models\PageMetaSeo;
 use Illuminate\Support\Facades\DB;
 
