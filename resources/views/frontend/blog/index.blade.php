@@ -27,7 +27,8 @@
     <section class="section pt-0">
         <div class="container-x">
             <h2 class="font-display text-2xl mb-6 fade-up">⚡ Featured</h2>
-            <a href="blog-details.html" class="project-card glass glass-hover relative grid md:grid-cols-2 fade-up">
+            <a href="{{ route('frontend.blog.details') }}"
+                class="project-card glass glass-hover relative grid md:grid-cols-2 fade-up">
                 <div
                     class="aspect-video md:aspect-auto thumb bg-gradient-to-br from-cyan-500/30 to-purple-600/30 grid place-items-center text-7xl">
                     🚀</div>
@@ -46,7 +47,7 @@
     <!-- Grid -->
     <section class="section pt-0">
         <div class="container-x grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <a href="blog-details.html" class="project-card glass glass-hover relative fade-up">
+            <a href="{{ route('frontend.blog.details') }}" class="project-card glass glass-hover relative fade-up">
                 <div
                     class="aspect-video thumb bg-gradient-to-br from-purple-500/30 to-pink-500/30 grid place-items-center text-5xl">
                     🛰</div>
@@ -56,7 +57,7 @@
                     <p class="text-slate-500 text-sm mt-3">Apr 28 · 6 min</p>
                 </div>
             </a>
-            <a href="blog-details.html" class="project-card glass glass-hover relative fade-up">
+            <a href="{{ route('frontend.blog.details') }}" class="project-card glass glass-hover relative fade-up">
                 <div
                     class="aspect-video thumb bg-gradient-to-br from-blue-500/30 to-cyan-500/30 grid place-items-center text-5xl">
                     💬</div>
@@ -66,7 +67,7 @@
                     <p class="text-slate-500 text-sm mt-3">Apr 15 · 7 min</p>
                 </div>
             </a>
-            <a href="blog-details.html" class="project-card glass glass-hover relative fade-up">
+            <a href="{{ route('frontend.blog.details') }}" class="project-card glass glass-hover relative fade-up">
                 <div
                     class="aspect-video thumb bg-gradient-to-br from-emerald-500/30 to-cyan-500/30 grid place-items-center text-5xl">
                     🧪</div>
@@ -76,7 +77,7 @@
                     <p class="text-slate-500 text-sm mt-3">Mar 30 · 5 min</p>
                 </div>
             </a>
-            <a href="blog-details.html" class="project-card glass glass-hover relative fade-up">
+            <a href="{{ route('frontend.blog.details') }}" class="project-card glass glass-hover relative fade-up">
                 <div
                     class="aspect-video thumb bg-gradient-to-br from-fuchsia-500/30 to-indigo-500/30 grid place-items-center text-5xl">
                     🛒</div>
@@ -86,7 +87,7 @@
                     <p class="text-slate-500 text-sm mt-3">Mar 12 · 8 min</p>
                 </div>
             </a>
-            <a href="blog-details.html" class="project-card glass glass-hover relative fade-up">
+            <a href="{{ route('frontend.blog.details') }}" class="project-card glass glass-hover relative fade-up">
                 <div
                     class="aspect-video thumb bg-gradient-to-br from-rose-500/30 to-orange-500/30 grid place-items-center text-5xl">
                     🐳</div>
@@ -96,7 +97,7 @@
                     <p class="text-slate-500 text-sm mt-3">Feb 22 · 6 min</p>
                 </div>
             </a>
-            <a href="blog-details.html" class="project-card glass glass-hover relative fade-up">
+            <a href="{{ route('frontend.blog.details') }}" class="project-card glass glass-hover relative fade-up">
                 <div
                     class="aspect-video thumb bg-gradient-to-br from-cyan-500/30 to-indigo-500/30 grid place-items-center text-5xl">
                     🧠</div>
